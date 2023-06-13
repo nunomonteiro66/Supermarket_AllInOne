@@ -82,7 +82,7 @@ def criarDicionario(lista):
 
     
 
-    #addProduto(dicionario)
+    addProduto(dicionario)
 
     return dicionario
 

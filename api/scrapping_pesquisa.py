@@ -157,7 +157,7 @@ def continente(pesquisa, initial, end, filter="relevance"):
             # adiciona à lista de produtos
             lista_produtos.append(dicionario)
         except Exception as e:
-            print(e)
+            print("Continente - {pesquisa} - {erro}".format(pesquisa=pesquisa, erro=e))
 
 
         
@@ -183,70 +183,72 @@ def intermarche(pesquisa):
     lista_produtos = []
 
     for soup in soup_all:
-
-        # verifica se o produto esta disponivel
-        non = soup.find('div', class_="vignette_non_dispo")
-        if(non != None):  # salta o produto
-            continue
-
-        # produto atual
-        soup = bs(str(soup), 'html.parser')
-
-        #img (top)
-        soup_top = soup.find(
-            'div', class_="vignette_img transition js-ouvrir_fiche")
-        #soup_top = bs(str(soup_top),'html.parser')
-
         try:
-            img = soup_top.find('img')['src']
-        except:
-            img = soup_top.find('img')['data-original']
+            # verifica se o produto esta disponivel
+            non = soup.find('div', class_="vignette_non_dispo")
+            if(non != None):  # salta o produto
+                continue
 
-        #marca, nome, quantidade (medio)
-        soup_medio = bs(
-            str(soup.find('div', class_="vignette_info")), 'html.parser')
-        soup_medio_list = soup_medio.find_all('p')
-        marca = soup_medio_list[0].contents[0].strip()
-        nome = soup_medio_list[1].contents[0].strip()
-        try:
-            quantidade = soup_medio.find('span').contents[0].strip()
-            quantidade=onlyNumbers(quantidade)
-        except:
-            quantidade = 0
+            # produto atual
+            soup = bs(str(soup), 'html.parser')
+
+            #img (top)
+            soup_top = soup.find(
+                'div', class_="vignette_img transition js-ouvrir_fiche")
+            #soup_top = bs(str(soup_top),'html.parser')
+
+            try:
+                img = soup_top.find('img')['src']
+            except:
+                img = soup_top.find('img')['data-original']
+
+            #marca, nome, quantidade (medio)
+            soup_medio = bs(
+                str(soup.find('div', class_="vignette_info")), 'html.parser')
+            soup_medio_list = soup_medio.find_all('p')
+            marca = soup_medio_list[0].contents[0].strip()
+            nome = soup_medio_list[1].contents[0].strip()
+            try:
+                quantidade = soup_medio.find('span').contents[0].strip()
+                quantidade=onlyNumbers(quantidade)
+            except:
+                quantidade = 0
     
 
-        #preco, preco_original, preco_u_m, u_m (low)
-        soup_low = bs(
-            str(soup.find('div', class_="vignette_prix inline")), "html.parser")
-        preco_original = soup_low.find('del').contents
+            #preco, preco_original, preco_u_m, u_m (low)
+            soup_low = bs(
+                str(soup.find('div', class_="vignette_prix inline")), "html.parser")
+            preco_original = soup_low.find('del').contents
 
-        soup_low_list = list(soup_low.find_all('p'))
-        preco = simplifyPrice(soup_low_list[0].contents[0])
+            soup_low_list = list(soup_low.find_all('p'))
+            preco = simplifyPrice(soup_low_list[0].contents[0])
 
-        soup_low_elem = soup_low_list[1].contents[0].strip().split("/")
-        preco_un = simplifyPrice(soup_low_elem[0])
-        u_m = soup_low_elem[1]
+            soup_low_elem = soup_low_list[1].contents[0].strip().split("/")
+            preco_un = simplifyPrice(soup_low_elem[0])
+            u_m = soup_low_elem[1]
 
-        if(len(preco_original) != 0):
-            preco_original = simplifyPrice(preco_original[0])
-        else:
-            preco_original = preco
+            if(len(preco_original) != 0):
+                preco_original = simplifyPrice(preco_original[0])
+            else:
+                preco_original = preco
 
-        #valor_desconto, tipo_desconto (calculo)
-        if(preco_original != preco):
-            valor_desc = calculoDesconto(preco_original, preco)
-            tipo = 'imediato'
+            #valor_desconto, tipo_desconto (calculo)
+            if(preco_original != preco):
+                valor_desc = calculoDesconto(preco_original, preco)
+                tipo = 'imediato'
 
-            # construcao do dicionario do desconto
-            values = [valor_desc, tipo, preco_original]
-            dict_desc = dicionarioDesconto(values)
-        else:
-            dict_desc = NULL
+                # construcao do dicionario do desconto
+                values = [valor_desc, tipo, preco_original]
+                dict_desc = dicionarioDesconto(values)
+            else:
+                dict_desc = NULL
 
-        # construir dicionario e adicionar a lista
-        values = [nome, marca, quantidade,
-                  preco, preco_un, u_m, img, dict_desc,img, 'intermarche',u_m]
-        lista_produtos.append(criarDicionario(values))
+            # construir dicionario e adicionar a lista
+            values = [nome, marca, quantidade,
+                      preco, preco_un, u_m, img, dict_desc,img, 'intermarche',u_m]
+            lista_produtos.append(criarDicionario(values))
+        except Exception as e:
+            print(e)
 
     return lista_produtos
 
@@ -275,9 +277,10 @@ def pingoDoce_pagina(html):
 
 def pingoDoce(pesquisa, page, filter = "relevance"):
     #https://mercadao.pt/api/catalogues/6107d28d72939a003ff6bf51/products/search?query=%5B%22massa%22%5D&filter=%7B%22from%22:0,%22sort%22:0,%22size%22:10,%22esPreference%22:0.45257131604182566%7D
+    #https://mercadao.pt/api/catalogues/6107d28d72939a003ff6bf51/products/search?query=[%22arroz%22]&from=0&size=100&esPreference=0.7120991451947071
     match filter:
         case 'relevance':
-            url="https://mercadao.pt/api/catalogues/6107d28d72939a003ff6bf51/products/search?query=%5B%22{pesquisa}%22%5D&filter=%7B%22from%22:{page},%22sort%22:0,%22size%22:10,%22esPreference%22:0.45257131604182566%7D".format(pesquisa=pesquisa, page=page)
+            url="https://mercadao.pt/api/catalogues/6107d28d72939a003ff6bf51/products/search?query=[%22{pesquisa}%22]&from={page}&size=100&esPreference=0.7120991451947071".format(pesquisa=pesquisa, page=page)
         case 'high-to-low':
             url = "https://mercadao.pt/api/catalogues/6107d28d72939a003ff6bf51/products/search?query=%5B%22{pesquisa}%22%%5D&filter=%7B%22from%22:{page},%22sort%22:%7B%22buyingPrice%22:%22desc%22%7D,%22size%22:10,%22esPreference%22:0.5924943676675563%7D".format(pesquisa=pesquisa, page=page)
         case 'low-to-high':
@@ -285,15 +288,12 @@ def pingoDoce(pesquisa, page, filter = "relevance"):
         case 'a-to-z':
             url = "https://mercadao.pt/api/catalogues/6107d28d72939a003ff6bf51/products/search?query=%5B%22{pesquisa}%22%5D&filter=%7B%22from%22:{page},%22sort%22:%7B%22shortDescription.raw%22:%22asc%22%7D,%22size%22:10,%22esPreference%22:0.5924943676675563%7D".format(pesquisa=pesquisa, page=page)
         case 'homePage':
-            url = "https://mercadao.pt/api/catalogues/6107d28d72939a003ff6bf51/products/search?query=%5B%22%22%5D&filter=%7B%22from%22:{page},%22sort%22:%7B%22shortDescription.raw%22:%22asc%22%7D,%22size%22:10,%22esPreference%22:0.5924943676675563%7D".format(page=page)
+            url = "https://mercadao.pt/api/catalogues/6107d28d72939a003ff6bf51/products/search?query=[%22%22]&from=0&size=100&esPreference=0.7120991451947071"
 
 
 
     response = requests.get(url)
     response = response.json()
-
-   
-  
 
     dicti = dict(response['sections'][pesquisa])
     dicti = dicti['products']
@@ -364,8 +364,7 @@ def pingoDoce(pesquisa, page, filter = "relevance"):
         
     return lista_produtos
 
-
-
+asd = pingoDoce('', 0, 'homePage')
 def mini_preco_produto(link):
     page = requests.get(link)
     soup = bs(page.content,'html.parser')

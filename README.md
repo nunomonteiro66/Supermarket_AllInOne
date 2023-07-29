@@ -20,3 +20,9 @@ A simple APP built in flutter, that allows to:
 - Add products to a shopping cart, and then see and compare the final price in several supermarkets
 - See which supermarket is the closest to the current location
 - See price history (using the database)
+
+# Screenshots
+![HomePage](img/homepage.png)  ![Pesquisa](img/pesquisa.png) ![info](img/info.png) ![produto](img/produto.png) ![comp](img/comp.png) ![dist](img/dist.png) 
+![historico](img/historico.png) 
+
+

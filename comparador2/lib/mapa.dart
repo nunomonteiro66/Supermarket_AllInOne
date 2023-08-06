@@ -65,7 +65,7 @@ class _MapaBuilderState extends State<MapaBuilder> {
 
   //localiza a posicao de um supermercado
   getPlace() async {
-    var gp = GooglePlace("AIzaSyB-GwDoIsl84nL1OusMJ2NPukpf43Nmq5w");
+    var gp = GooglePlace("API-KEY");
     var result = await gp.search.getNearBySearch(
         Location(
             lat: _currentPosition.latitude, lng: _currentPosition.longitude),
@@ -144,7 +144,7 @@ class _MapaBuilderState extends State<MapaBuilder> {
     polylinePoints = PolylinePoints();
 
     PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-        "AIzaSyB-GwDoIsl84nL1OusMJ2NPukpf43Nmq5w",
+        "API-KEY",
         PointLatLng(_currentPosition.latitude, _currentPosition.longitude),
         PointLatLng(_destinationPosition.lat!.toDouble(),
             _destinationPosition.lng!.toDouble()));
